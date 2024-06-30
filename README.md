@@ -1,4 +1,4 @@
-# Cod-Notification-Manager
+# WindowsNotificationManager
 Notification Manager for advanced notifications in Windows 10/11
 
 ## Example demo
@@ -7,7 +7,7 @@ Notification Manager for advanced notifications in Windows 10/11
 
 ## Examples
 ### Create notification manager
-```
+```pascal
   Manager := TNotificationManager.Create('App.Test');
 
   Manager.ApplicationName := 'Amazing application';
@@ -15,7 +15,7 @@ Notification Manager for advanced notifications in Windows 10/11
 ```
 
 ### Creating a notification
-```
+```pascal
  var NotifyContent := TToastContentBuilder.Create;
   try
     with NotifyContent do
@@ -63,18 +63,18 @@ Notification Manager for advanced notifications in Windows 10/11
 ```
 
 ### Pushing notification
-```
+```pascal
   Manager.ShowNotification(Notif);
 ```
 
 
 ### Hiding notification
-```
+```pascal
   Manager.HideNotification(Notif);
 ```
 
 ### Updating notification contents
-```
+```pascal
   const DownloadValue = Notif.Data['download-pos'].ToSingle + 0.1;
   Notif.Data['download-pos'] := DownloadValue.ToString;
   if DownloadValue >= 1 then
@@ -85,7 +85,7 @@ Notification Manager for advanced notifications in Windows 10/11
 ```
 
 ### Reading event data
-```
+```pascal
 procedure TForm1.NotifActivated(Sender: TNotification; Arguments: string; UserInput: TUserInputMap);
 begin
   if Arguments = 'view' then
