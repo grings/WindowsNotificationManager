@@ -13,14 +13,6 @@ uses
   Winapi.Winrt, Winapi.Winrt.Utils, Winapi.DataRT, Winapi.UI.Notifications;
 
 type
-  TWinBoolean = (WinDefault, WinFalse, WinTrue);
-
-  TWinBool = TWinBoolean;
-
-  TWinBooleanHelper = record helper for TWinBoolean
-    function ToBoolean(Default: Boolean = False): boolean;
-  end;
-
   TXMLInterface = Xml_Dom_IXmlDocument;
 
   // WinXML custom document management
@@ -125,11 +117,6 @@ type
     procedure Free;
   end;
 
-// WinBool
-function WinBooleanToString(AType: TWinBoolean): string;
-
-function WinBool(Value: boolean): TWinBoolean;
-
 // Factory
 function FactoryCreateInstance(Name: string): IInspectable;
 
@@ -144,26 +131,6 @@ procedure FreeHString(AString: HSTRING);
 function CreateNewXMLInterface: TXMLInterface;
 
 implementation
-
-function WinBooleanToString(AType: TWinBoolean): string;
-begin
-  case AType of
-    TWinBoolean.WinDefault:
-      Result := 'default';
-    TWinBoolean.WinFalse:
-      Result := 'false';
-    TWinBoolean.WinTrue:
-      Result := 'true';
-  end;
-end;
-
-function WinBool(Value: boolean): TWinBoolean;
-begin
-  if Value then
-    Result := TWinBoolean.WinTrue
-  else
-    Result := TWinBoolean.WinFalse;
-end;
 
 function FactoryCreateInstance(Name: string): IInspectable;
 var
@@ -580,20 +547,6 @@ constructor TWinXMLDocument.Create;
 begin
   inherited Create;
   FTagName := 'xml';
-end;
-
-{ TWinBooleanHelper }
-
-function TWinBooleanHelper.ToBoolean(Default: Boolean): boolean;
-begin
-  case Self of
-    TWinBoolean.WinFalse:
-      Result := False;
-    TWinBoolean.WinTrue:
-      Result := True;
-  else
-    Result := Default;
-  end;
 end;
 
 end.
