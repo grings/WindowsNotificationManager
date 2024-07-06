@@ -570,6 +570,10 @@ type
     /// The initial text to place in the text box. Leave this null for a blank text box.
     /// </summary>
     function DefaultInput(const Value: string): TToastTextBox;
+    /// <summary>
+    /// Add custom argument
+    /// </summary>
+    function AddArgument(const Name, Value: string): TToastTextBox;
   end;
 
   /// <summary>
@@ -618,6 +622,10 @@ type
     /// Specifies the id and text of a selection item.
     /// </summary>
     function Items(const Values: TArray<TToastSelectionBoxItem>): TToastSelectionBox;
+    /// <summary>
+    /// Add custom argument
+    /// </summary>
+    function AddArgument(const Name, Value: string): TToastSelectionBox;
   end;
 
   /// <summary>
@@ -708,6 +716,10 @@ type
     /// The tooltip for a button, if the button has an empty content string.
     /// </summary>
     function HintToolTip(const Value: string): TToastAction;
+    /// <summary>
+    /// Add custom argument
+    /// </summary>
+    function AddArgument(const Name, Value: string): TToastAction;
   end;
 
   /// <summary>
@@ -2324,6 +2336,12 @@ end;
 
 { TToastTextBox }
 
+function TToastTextBox.AddArgument(const Name, Value: string): TToastTextBox;
+begin
+  FNode.Attributes[Name] := Value;
+  Result := Self;
+end;
+
 function TToastTextBox.DefaultInput(const Value: string): TToastTextBox;
 begin
   FNode.Attributes['defaultInput'] := Value;
@@ -2355,6 +2373,12 @@ begin
 end;
 
 { TToastSelectionBox }
+
+function TToastSelectionBox.AddArgument(const Name, Value: string): TToastSelectionBox;
+begin
+  FNode.Attributes[Name] := Value;
+  Result := Self;
+end;
 
 function TToastSelectionBox.DefaultInput(const Value: string): TToastSelectionBox;
 begin
@@ -2416,6 +2440,12 @@ end;
 function TToastAction.ActivationType(const Value: TActivationType): TToastAction;
 begin
   FNode.Attributes['activationType'] := Value.ToString;
+  Result := Self;
+end;
+
+function TToastAction.AddArgument(const Name, Value: string): TToastAction;
+begin
+  FNode.Attributes[Name] := Value;
   Result := Self;
 end;
 
