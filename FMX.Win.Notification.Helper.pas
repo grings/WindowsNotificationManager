@@ -1,4 +1,4 @@
-unit FMX.Win.Notification.Helper;
+﻿unit FMX.Win.Notification.Helper;
 
 interface
 
@@ -105,140 +105,45 @@ type
     destructor Destroy; override;
   end;
 
-  // Helpers
-  HStringHelper = record helper for HSTRING
-    constructor Create(S: string);
-
-    function CompareTo(Value: HString): TValueRelationship;
-    function Length: cardinal;
-    function Empty: boolean;
-
-    function ToString: string;
-    procedure Free;
-  end;
-
 // Factory
-function FactoryCreateInstance(Name: string): IInspectable;
-
-// HString
-function StringToHString(Value: string): HSTRING; // Needs to be freed with WindowsDeleteString
-
-function HStringToString(AString: HSTRING): string;
-
-procedure FreeHString(AString: HSTRING);
+function FactoryCreateInstance(const Name: string): IInspectable;
 
 // XML
 function CreateNewXMLInterface: TXMLInterface;
 
 implementation
 
-function FactoryCreateInstance(Name: string): IInspectable;
-var
-  className: HSTRING;
+uses
+  System.Win.WinRT;
+
+function FactoryCreateInstance(const Name: string): IInspectable;
 begin
   Result := nil;
-
-  // Runtime class
-  className := HSTRING.Create(Name);
-
   // Activate the instance
-  try
-    if Failed(RoActivateInstance(className, Result)) then
-      raise Exception.Create('Could not create notification data.');
-  finally
-    className.Free;
-  end;
-end;
-
-function StringToHString(Value: string): HSTRING;
-begin
-  if Failed(WindowsCreateString(PWideChar(Value), Length(Value), Result)) then
-    raise Exception.CreateFmt('Unable to create HString for %s', [Value]);
-end;
-
-function HStringToString(AString: HSTRING): string;
-var
-  Buf: PWideChar;
-  Len: UINT32;
-begin
-  Buf := WindowsGetStringRawBuffer(AString, @Len);
-  if Buf = nil then
-    Result := ''
-  else
-    Result := Copy(Buf, 1, Len);
-end;
-
-procedure FreeHString(AString: HSTRING);
-begin
-  if Failed(WindowsDeleteString(AString)) then
-    RaiseLastOSError;
+  if Failed(RoActivateInstance(TWindowsString.Create(Name), Result)) then
+    raise Exception.Create('Could not create notification data.');
 end;
 
 function CreateNewXMLInterface: TXMLInterface;
 var
   instance: IInspectable;
-  className: HSTRING;
   xmlDoc: Xml_Dom_IXmlDocument;
   HRes: HRESULT;
 begin
   // Initialize output to nil
   xmlDoc := nil;
-
-  // Create the HSTRING for the XmlDocument runtime class name
-  className := HSTRING.Create('Windows.Data.Xml.Dom.XmlDocument');
-
-  try
     // Activate the XmlDocument instance
-    HRes := RoActivateInstance(className, instance);
-    if Failed(HRes) then
-      raise Exception.CreateFmt('Failed to activate instance: 0x%.8x', [HRes]);
+  HRes := RoActivateInstance(TWindowsString.Create('Windows.Data.Xml.Dom.XmlDocument'), instance);
+  if Failed(HRes) then
+    raise Exception.CreateFmt('Failed to activate instance: 0x%.8x', [HRes]);
 
     // Query for the IXmlDocument interface
-    xmlDoc := Xml_Dom_IXmlDocument(instance);
-    HRes := instance.QueryInterface(Xml_Dom_IXmlDocument, xmlDoc);
-    if Failed(HRes) then
-      raise Exception.CreateFmt('Failed to query IXmlDocument interface: 0x%.8x', [HRes]);
+  xmlDoc := Xml_Dom_IXmlDocument(instance);
+  HRes := instance.QueryInterface(Xml_Dom_IXmlDocument, xmlDoc);
+  if Failed(HRes) then
+    raise Exception.CreateFmt('Failed to query IXmlDocument interface: 0x%.8x', [HRes]);
 
-    Result := xmlDoc;
-  finally
-    className.Free;
-  end;
-end;
-
-{ HStringHelper }
-
-function HStringHelper.CompareTo(Value: HString): TValueRelationship;
-begin
-  var Relationship: UINT32;
-  if Failed(WindowsCompareStringOrdinal(Self, Value, Relationship)) then
-    raise Exception.Create('Comparison failed.');
-  Result := Relationship;
-end;
-
-constructor HStringHelper.Create(S: string);
-begin
-  Self := StringToHString(S);
-end;
-
-function HStringHelper.Empty: boolean;
-begin
-  Result := WindowsIsStringEmpty(Self);
-end;
-
-procedure HStringHelper.Free;
-begin
-  FreeHString(Self);
-  Self := 0;
-end;
-
-function HStringHelper.length: cardinal;
-begin
-  Result := WindowsGetStringLen(Self);
-end;
-
-function HStringHelper.ToString: string;
-begin
-  Result := HStringToString(Self);
+  Result := xmlDoc;
 end;
 
 { TDomXMLDocument }
@@ -267,22 +172,17 @@ end;
 
 function TDomXMLDocument.Format: string;
 begin
-  var HS := (DomXML.DocumentElement as Xml_Dom_IXmlNodeSerializer).GetXml;
+  var HStr := (DomXML.DocumentElement as Xml_Dom_IXmlNodeSerializer).GetXml;
   try
-    Result := HS.ToString;
+    Result := HStr.ToString;
   finally
-    HS.Free;
+    WindowsDeleteString(HStr);
   end;
 end;
 
 procedure TDomXMLDocument.Parse(XMLDocument: string);
 begin
-  var hXML := HSTRING.Create(XMLDocument);
-  try
-    (DomXML as Xml_Dom_IXmlDocumentIO).LoadXml(hXML);
-  finally
-    hXML.Free;
-  end;
+  (DomXML as Xml_Dom_IXmlDocumentIO).LoadXml(TWindowsString.Create(XMLDocument));
 end;
 
 { TWinXMLBranch }
