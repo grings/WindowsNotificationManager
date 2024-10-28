@@ -2,8 +2,6 @@
 
 interface
 
-{$SCOPEDENUMS ON}
-
 uses
   System.SysUtils, System.Classes, System.Types, System.Math, System.IOUtils,
   System.Generics.Collections,
