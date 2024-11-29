@@ -3,14 +3,14 @@
 interface
 
 uses
-  System.SysUtils, System.Classes, FMX.Forms, System.IOUtils,
-  System.Generics.Collections, System.DateUtils, System.Win.Registry,
+  System.SysUtils, System.Classes, System.Generics.Collections, System.DateUtils,
+  System.Win.Registry,
+  ///
+  FMX.Win.Notification.XML,
   // Windows RT (Runtime)
   Win.WinRT, Winapi.Winrt, Winapi.Winrt.Utils, Winapi.UI.Notifications,
   // Winapi
-  Winapi.Windows, Winapi.Messages, Winapi.CommonTypes, Winapi.Foundation,
-  ///
-  FMX.Win.Notification.Helper;
+  Winapi.Windows, Winapi.Messages, Winapi.CommonTypes, Winapi.Foundation;
 
 {$SCOPEDENUMS ON}
 
@@ -1039,6 +1039,14 @@ const
   IID_IScheduledToastNotifier: TGUID = '{79F577F8-0DE7-48CD-9740-9B370490C838}';
 
 implementation
+
+function FactoryCreateInstance(const Name: string): IInspectable;
+begin
+  Result := nil;
+  // Activate the instance
+  if Failed(RoActivateInstance(TWindowsString.Create(Name), Result)) then
+    raise Exception.Create('Could not create notification data.');
+end;
 
 function BooleanToXml(const Value: Boolean): string;
 begin

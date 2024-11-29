@@ -1,14 +1,13 @@
-﻿unit FMX.Win.Notification.Helper;
+﻿unit FMX.Win.Notification.XML;
 
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Types, System.Math, System.IOUtils,
-  System.Generics.Collections,
+  System.SysUtils, System.Classes, System.Types, System.Math,
   // Winapi
-  Winapi.Windows, Winapi.Messages, Winapi.CommonTypes, Winapi.Foundation,
+  Winapi.Windows,
   // Windows RT (Runtime)
-  Winapi.Winrt, Winapi.Winrt.Utils, Winapi.DataRT, Winapi.UI.Notifications;
+  Winapi.Winrt, Winapi.DataRT;
 
 type
   TXMLInterface = Xml_Dom_IXmlDocument;
@@ -103,24 +102,12 @@ type
     destructor Destroy; override;
   end;
 
-// Factory
-function FactoryCreateInstance(const Name: string): IInspectable;
-
-// XML
 function CreateNewXMLInterface: TXMLInterface;
 
 implementation
 
 uses
-  System.Win.WinRT;
-
-function FactoryCreateInstance(const Name: string): IInspectable;
-begin
-  Result := nil;
-  // Activate the instance
-  if Failed(RoActivateInstance(TWindowsString.Create(Name), Result)) then
-    raise Exception.Create('Could not create notification data.');
-end;
+  Win.WinRT;
 
 function CreateNewXMLInterface: TXMLInterface;
 var
