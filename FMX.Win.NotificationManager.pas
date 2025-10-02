@@ -8,7 +8,7 @@ uses
   ///
   FMX.Win.Notification.XML,
   // Windows RT (Runtime)
-  Win.WinRT, Winapi.Winrt, Winapi.Winrt.Utils, Winapi.UI.Notifications,
+  Win.WinRT, Winapi.DataRT, Winapi.Winrt, Winapi.Winrt.Utils, Winapi.UI.Notifications,
   // Winapi
   Winapi.Windows, Winapi.Messages, Winapi.CommonTypes, Winapi.Foundation;
 
@@ -194,21 +194,21 @@ type
     destructor Destroy; override;
   end;
 
-  TNotificationActivatedHandler = class(TNotificationEventHandler, TypedEventHandler_2__IToastNotification__IInspectable, TypedEventHandler_2__IToastNotification__IInspectable_Delegate_Base)
+  TNotificationActivatedHandler = class(TNotificationEventHandler, TypedEventHandler_2__IToastNotification__IInspectable)
     procedure Invoke(sender: IToastNotification; args: IInspectable); safecall;
 
     constructor Create(const ANotification: TNotification); override;
     procedure Unscribe; override;
   end;
 
-  TNotificationDismissedHandler = class(TNotificationEventHandler, TypedEventHandler_2__IToastNotification__IToastDismissedEventArgs, TypedEventHandler_2__IToastNotification__IToastDismissedEventArgs_Delegate_Base)
+  TNotificationDismissedHandler = class(TNotificationEventHandler, TypedEventHandler_2__IToastNotification__IToastDismissedEventArgs)
     procedure Invoke(sender: IToastNotification; args: IToastDismissedEventArgs); safecall;
 
     constructor Create(const ANotification: TNotification); override;
     procedure Unscribe; override;
   end;
 
-  TNotificationFailedHandler = class(TNotificationEventHandler, TypedEventHandler_2__IToastNotification__IToastFailedEventArgs, TypedEventHandler_2__IToastNotification__IToastFailedEventArgs_Delegate_Base)
+  TNotificationFailedHandler = class(TNotificationEventHandler, TypedEventHandler_2__IToastNotification__IToastFailedEventArgs)
     procedure Invoke(sender: IToastNotification; args: IToastFailedEventArgs); safecall;
 
     constructor Create(const ANotification: TNotification); override;
@@ -241,12 +241,12 @@ type
   // User input parser
   TUserInputMap = class
   private
-    FMap: IMap_2__HSTRING__IInspectable;
+    FMap: IMap_2__HSTRING__HSTRING;
   public
     function HasValue(ID: string): boolean;
     function GetStringValue(ID: string): string;
     function GetIntValue(ID: string): integer;
-    constructor Create(LookupMap: IMap_2__HSTRING__IInspectable); reintroduce;
+    constructor Create(LookupMap: IMap_2__HSTRING__HSTRING); reintroduce;
     destructor Destroy; override;
   end;
 
@@ -1463,7 +1463,7 @@ begin
   const Data = args as IToastActivatedEventArgs;
   const Data2 = args as IToastActivatedEventArgs2;
 
-  const Map = TUserInputMap.Create(Data2.UserInput as IMap_2__HSTRING__IInspectable);
+  const Map = TUserInputMap.Create(Data2.UserInput as IMap_2__HSTRING__HSTRING);
   try
     if Assigned(FNotification.FOnActivated) then
       FNotification.FOnActivated(FNotification, Data.Arguments.ToString, Map);
@@ -2002,7 +2002,7 @@ end;
 
 { TUserInputMap }
 
-constructor TUserInputMap.Create(LookupMap: IMap_2__HSTRING__IInspectable);
+constructor TUserInputMap.Create(LookupMap: IMap_2__HSTRING__HSTRING);
 begin
   inherited Create;
   FMap := LookupMap;
@@ -2019,7 +2019,7 @@ begin
   const HStr = TWindowsString.Create(ID);
   if not FMap.HasKey(HStr) then
     Exit(0);
-  Result := (FMap.Lookup(HStr) as IPropertyValue).GetInt32;
+  Result := IPropertyValue(FMap.Lookup(HStr)).GetInt32;
 end;
 
 function TUserInputMap.GetStringValue(ID: string): string;
@@ -2027,7 +2027,7 @@ begin
   const HStr = TWindowsString.Create(ID);
   if not FMap.HasKey(HStr) then
     Exit('');
-  const HRes = (FMap.Lookup(HStr) as IPropertyValue).GetString;
+  const HRes = IPropertyValue(FMap.Lookup(HStr)).GetString;
   try
     Result := HRes.ToString;
   finally
